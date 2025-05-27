@@ -1,0 +1,967 @@
+Vamos falar sobre Modelagem de Sistemas Baseados em Eventos?
+
+Olá pessoas, tudo bem?
+
+Para quem não me conhece, meu nome é Victor Osório e esse é o canal Computação Crítica.
+
+Eu trago vídeos quase todo dia, muitos deles eu chamo de cafezinho, onde eu falo sobre temas aleatórios tirados das redes sociais.
+
+Porém esse é um vídeo mais longo, que tem um roteiro pré-estabelecido e tem referências.
+
+Então já deixa avisado aqui para dar uma olhada na descrição que vai encontrar a divisão de capítulos e as referências usadas nesse vídeo.
+
+E nele a gente vai falar sobre Modelagem de Sistemas Baseados em Eventos.
+
+Então primeira pergunta que eu vou tentar responder é "Por a gente fala de Sistemas Baseados em Eventos?"
+
+Para depois tentar entender "O que é modelagem de sistemas?"
+
+E assim, por fim, responder "Como a gente pode modelar sistemas baseados em eventos?"
+
+Então vamos começar?
+
+Por que sistemas baseados em eventos?
+
+Você deve estar pensando aí...
+
+O que eu ganho ao tentar modelar um sistema baseados em eventos?
+
+Ou, qual a diferença entre um sistema tradicional e um sistema baseados em eventos?
+
+Fica comigo que a gente vai responder essas perguntas, e você vai conseguir compreender.
+
+Primeiro, eu tenho que alinhar algumas expectativas com você.
+
+Muitas pessoas pensam: "Nossa o sistema vai ser diferente", "Ah, eu vou ter que usar um Kafka", "Não sei o quê blá blá".
+
+
+Primeiro assim, eventos não trazem nenhuma nova funcionalidade pro seu software.
+
+É bem capaz de você usar sistemas baseados em eventos e você não perceber a diferença. Por quê?
+
+Eventos vão fazer parte da infraestrutura de comunicação do seu sistema.
+
+Muitas vezes você nem percebe que está sendo usado eventos.
+
+Eventos podem fazer seu software funcionar melhor.
+
+SIM!!! Se você não percebeu, tem muitos softwares que funcionam baseados em eventos.
+
+Para quê? Para aliviar demandas, aliviar picos de demandas.
+
+Então, eu sempre, digo que, existe uma maneira fácil de você perceber se um software usa eventos, ou não.
+
+Se você no seu marketplace que você faz compra.
+
+Quando aperta o botãozinho compra finalizada, se quando você aperta o botão demora um pouquinho e já recebe o e-mail,
+
+já recebe a notificação no celular que a compra foi efetivada.
+
+Talvez o sistema não seja modelado baseados eventos.
+
+Mas se você aperta ali o botão de finalizar compra, e alguns segundos depois recebe a notificação.
+
+Olha você recebeu um e-mail dizendo que a compra foi finalizada.
+
+Depois alguns minutos, olha cartão aprovou a sua compra.
+
+E aí, lá no final do dia, você recebe "aqui está aqui o seu localizador".
+
+Pode ter certeza que, esse sistema é feito baseados em eventos.
+
+E por isso eventos podem fazer o desenvolvimento ser mais fácil. E por quê?
+
+Porque que o desenvolvimento fica mais fácil se eu me baseio em eventos?
+
+Eu acho que isso não é, nem tanto, dos eventos, mas sobre modelar sistemas.
+
+Quando a gente modela um sistema, quando a gente para para pensar no sistema.
+
+E os eventos ajudam muito nisso, a gente tem que modelar os processos, delegar responsabilidades.
+
+E os eventos vão ajudar nisso.
+
+Eventos são uma forma de você desacoplar sistemas.
+
+Então assim, um sistema se comunica com o outro por evento.
+
+A gente vai ver isso na minha fala aqui, né? Nesse meu vídeo...
+
+Ah, primeiro a gente vai entender como isso acontece, como os sistemas ficam mais simples ao serem modelados com eventos.
+
+E pra isso, né, a gente vai ter que olhar pra um binômio chamado acoplamento e disponibilidade.
+
+o artigo que fala muito disso é o 'The Calculus of Service Availability'. Ele começa dizendo que você é tão disponível quanto a soma das suas dependências.
+
+Esse artigo é muito bom! Eu já li ele diversas vezes.
+
+O que ele basicamente diz é que quando você tem  um sistema
+
+e você vai fazer uma requisição, você depende de outros sistemas,
+
+e você define que as dependências síncronas, então você acaba diminuindo a sua disponibilidade dada pela a disponibilidade da sua dependências
+
+A soma das disponibilidades de todas as suas dependências.
+
+Então vamos pensar aqui no sistema HTTP. Ou REST.
+
+Qualquer coisa que seja você.
+
+Exponha ele ali por um API gateway e tem diversos serviços embaixo. Então olha para esse "Serviço 1".
+
+Esse "Serviço 1", vai fazer uma chamada que ele vai precisar chamar o "Serviço 2", o "Serviço 3", que por sua vez, o "Serviço 3" chama o "Serviço 4".
+
+Então, o que acontece, imagina que o "Serviço 4" está fora do ar.
+
+E que o "Serviço 3" não vai responder. Que o "Serviço 1" não vai responder.
+
+Então o sua a sua aplicação tá indisponível!!!
+
+Por quê? Porque ele não tem como responder aquela requisição, então ela tá indisponível. Ela tá acoplada aquela requisição.
+
+Então não é tão boa essa arquitetura.
+
+E tem como a gente modelar isso baseados em eventos? Tem sim!
+
+Eu botei aqui um Kafka, mas o Kafka é meramente ilustrativo.
+
+Poderia ser qualquer outro message broker.
+
+Você poderia usar qualquer um outro.
+
+Então esses serviços, eles vão se comunicar pelo o quê? Pela troca de mensagens assíncronas.
+
+Sempre pensa assim, eventos são assíncronos.
+
+Então eu envio uma mensagem, o outro sistema vai ler as mensagens que tem. Ele vai sempre processar uma fila de mensagens.
+
+Ele tá processando, ele pega a próxima mensagem, processa e responde. Pega a próxima mensagem, processa e responde.
+
+Então, ele não tem que responder automaticamente para o primeiro serviço.
+
+Então imagina, que o "Serviço 1" recebeu uma requisição do mobile.
+
+Então, o que ele vai fazer?
+
+Ele vai pegar e responder essa requisição.
+
+Olha, gerar um evento e responder.
+
+Então, a gente vai entender como modelar esses sistemas.
+
+Então vamos lá? Vamos começar?
+
+Primeiro, outra coisa, que eu quero dizer é que todo sistema pode ser escrito como baseados em eventos.
+
+Tem esse artigo que ele, por incrível que pareça é de 1979, chamado "On the Duality of Operating System Structures".
+
+Ele fala sobre estruturas de sistemas operacionais, mas você também pode ler ele pensando em sistemas baseados em eventos.
+
+O que que ele diz nesse artigo?
+
+Ele diz que todo o sistema pode ser mapeado como de forma programática, de forma procedural.
+
+Então, assim, quando você vai fazer uma chamada, você pensa em tudo aquilo que tem que ser feito.
+
+Ou ele pode ser baseado em eventos.
+
+Então, assim, quando você vai modelar um processo, você cria os eventos e você separa responsabilidades.
+
+E os processos se comunicam baseados na leitura e na emissão de eventos.
+
+Então, quando você tem um baseado em eventos. Um sistema só vai precisar conhecer o quê?
+
+O evento que ele tem que ler, o evento que ele tem que emitir e o canal de comunicação desses eventos.
+
+Então, esse artigo é muito bom! Caso você queira ler, o link está na descrição. Recomendo a leitura.
+
+E voltando ao "Como isso acontece?"
+
+Como é que os sistemas, ao serem baseados em eventos, conseguem aumentar a disponibilidade e reduzir o acoplamento?
+
+Ele reduz a dependência com outros sistemas. Então, por exemplo, aqui no meu caso: meu "Serviço 1".
+
+E aí, eu tô olhando aqui não do lado externo, mas só do interno dele.
+
+Ele não vai depender do "Serviço 5", do "Serviço 2", do "Serviço 4" 4 do "Serviço 3".
+
+Então, imagina ali: eu quero atualizar o meu "Serviço 5" e eu quero mudar alguma estrutura nele.
+
+O "Serviço 1" não vai ter que saber.
+
+Por quê? Porque o "Serviço 5" sabe os eventos que ele convêm... ah, e sabe os eventos que ele emite.
+
+Então ele pode ser atualizado ali de forma independente
+
+Outra forma é criar um barramento único.
+
+Então, assim: o "Serviço 1" não sabe o endereço, o endpoint do "Serviço 5", do "Serviço 2", do "Serviço 3" - ele não sabe.
+
+Ele só conhece o quê? Os tópicos. Aliás, eu tô falando de Kafka, mas poderia ser qualquer message queue - é disso que eu estou falando.
+
+Ele não - não sabe o endpoint de nada. Ele só conhece os tópicos que emite e que ele consome.
+
+E com isso temos Nenhum Ponto Único de Falha.
+
+Hã, hum... Aqui, o que que eu tô pensando aqui? Que o meu broker ele é distribuído, né?
+
+Se você escolhe um broker que não é distribuído, você pode ter ali um ponto único de falha.
+
+Mas falando especificamente do Kafka aqui...
+
+O Kafka ele pode ter - ele é feito naturalmente distribuído - ele pode ter diversos nós executando ali em paralelo.
+
+Né? Então, eu posso ter que... uma dessas instâncias está - se uma dessas instâncias está fora, ele continua disponível, né? Então, assim... eu, eu continuo tendo uma alta disponibilidade, mesmo que os eventos estejam, eh... indisponíveis.
+
+Uma outra forma de ver isso, também, é você pode lembrar daquela imagem que eu trouxe do REST, que o "Serviço 1" dependia de vários outros serviços.
+
+Se eu se eu paro algum desses serviços, o "Serviço 1" não vai cair.
+
+Por quê?
+
+Porque o "Serviço 5", tudo que ele vai parar, é parar de processar mensagem por alguns momentos.
+
+Pode ser que eu levante ele depois e ele continue processando mensagens.
+
+E eu não estou tornando o meu "Serviço 1" indisponível. Eu estou apenas pausando temporariamente o serviço um único.
+
+Todo processamento ele é assíncrono.
+
+Quando eu tenho um sistema baseado eventos, os meus processamentos são assíncrono.
+
+Então, imagina aqui que eu tenho um marketplace. E o marketplace, ele vai ter diversos eventos. O primeiro evento dele é o 'carrinho finalizado' ou 'compra finalizada'.
+
+Né? O que vai acontecer se o meu sistema tá fora do ar e não pode emitir ali o identificador do rastreamento? O meu carrinho continua podendo ser fechado.
+
+Agora, se eu tenho um sistema que é baseado no procedimento, que ele vai fazer uma chamada síncrona do meu carrinho, a minha compra não pode ser finalizada. A minha compra vai estar barrada da possível efetivação dela por uma disponibilidade de outros sistemas. Uma outra coisa também é o deploy independente, né?
+
+Sistemas baseados em eventos, eles vão depender de eventos que eles têm seu schema, a forma como ele é escrito, os campos dele. 
+
+E os schemas podem evoluir. 
+
+Então assim se eu tenho o meu "Serviço 2", 
+
+desde que eu que eu consiga ler as versões anteriores do schema e consiga se comunicar com os outros eventos, eu posso atualizar o meu "Serviço 2".
+
+Eu posso  parar ele por um tempo, atualizar ele, verificar que ele tá OK. Sem impactar no "Serviço 1", no "Serviço 5", em qualquer outro serviço.
+
+Então, com isso eu consegui mostrar aqui - caso você não tenha percebido, eh... - deixa eu fazer uma pergunta: por que que você não entendeu, né? Um sistema baseado em evento dá maior disponibilidade para os nossos sistemas.
+
+E aí eu chego à segunda pergunta "O que é modelagem de sistemas?" 
+
+Muitas pessoas já pensam só na Arquitetura, ou no System Design.
+
+
+A gente tem diversas formas de pensar ou construir sistemas e a gente conversa muito sobre arquitetura.
+
+
+Eu quero diferenciar um pouco o que é a arquitetura do que é a modelagem.
+
+Quando a gente pensa em arquitetura, a gente tá pensando em requisitos não-funcionais do sistema.
+
+Eu estou dizendo "olha eu quero que esse sistema consiga alcançar uma vazão tal", que ele consiga ter 10.000 req/s
+
+Quando a gente fala em modelagem, a gente está olhando pro domínio do sistema. 
+
+Eu estou olhando para dizer assim: "Olha esse aqui é um sistema de marketplace. Ele vai ter um serviço aqui, que é um serviço de logística. Vai ter um serviço de carrinho. Vai ter um serviço de pagamento." 
+
+Então, parece que são coisas similares, mas são atividades diferentes. A modelagem e arquitetura são atividades paralelas que se retroalimentam.
+
+Toda vez que for modelar um sistema baseado em seu domínio, essa modelagem impactará na arquitetura. E toda alteração na arquitetura afetará a modelagem. São elementos independentes, mas que se relacionam entre si.
+
+E qual que é a minha principal referência de modelagem? 
+
+É esses dois livros. Principalmente o azul. O vermelho, também, eu já dei uma lida. Que se chama-se "Domain-Driven Design". 
+
+Caso você não tenha visto, tem uma playlist onde eu comento o livro azul "Domain-Driven Design: Atacando a complexidade no coração do software. 
+
+Comento capítulo a capítulo, seguindo a lógica do livro. 
+
+Então se você não viu, deve estar aparecendo na tela em algum momento aqui. Dá uma olhada nessa meio playlist, acompanha ela, compartilha com quem quer conhecer um pouco mais de modelagem de sistemas.
+
+E o que o Domain-Driven Design pode nos ajudar a pensar em modelagem de sistemas?
+
+Primeiro, assim ele vai dar alguns conceitos interessantes. 
+
+Eu trouxe cinco aqui bem importantes. 
+
+O primeiro dele é o Domínio. 
+
+O que que é o domínio do nosso sistema? 
+
+O domínio é a área para o qual o sistema está sendo desenvolvido. 
+
+Então quando eu penso no marketplace. 
+
+Eu estou pensando numa loja online, e penso: 
+
+"Ah eu tenho uma loja online, eu tenho um carrinho, eu tenho a compra, eu tenho a parte de logística, a parte do pagamento" 
+
+É muito importante que o desenvolvedor, assim como todo o time, entenda do domínio. 
+
+Entenda o mínimo, não precisa ser o expert. 
+
+E consiga falar a linguagem do domínio. 
+
+Consiga entender o que é cada coisa do domínio.
+
+A segunda coisa que ele nos traz, é uma ideia chamada Linguagem Onipresente. 
+
+
+É muito comum a gente ouvir dos desenvolvedores: 'Ah, mas... eh... mas aqui o repositório tal, banco de dados...' 
+
+Os desenvolvedores costumam falar uma linguagem típica do desenvolvimento.
+
+Isso é muito comum. 
+
+O DDD, o Domain-Driven Design, ele defende que os desenvolvedores, e o pessoal do domínio falem uma mesma linguagem. 
+
+Elaborem essa linguagem. Treinem essa linguagem. 
+
+Então os desenvolvedores vão conhecer os termos de domínio, elaborar esses termos, saber significar eles. 
+
+E saber utilizar eles, tanto na sua fala do dia a dia, quanto no seu código. 
+
+O DDD defende que a linguagem onipresente, ela vai estar no domínio, mas ela também vai entrar no código. 
+
+Também vai descrever o código com aqueles aqueles elementos do domínio.
+
+E, por fim, ele tem o modelo. O que que é o modelo? O modelo é o domínio destilado.
+
+É o conhecimento destilado. 
+
+Então assim, o modelo é quando eu consigo elaborar frases falando sobre o meu domínio. 
+
+Então, por exemplo, eu posso falar assim: 
+
+"Ah quando o usuário finaliza a compra deve ser realizado o pagamento." 
+
+Isso é o meu modelo. 
+
+O meu modelo são frases que refletem o comportamento do sistema e essas frases elas devem ser mapeadas em código. 
+
+Então toda vez que você dizer lá que eu emito um evento de compra finalizada aquele evento tem que chamar Compra Finalizada.
+
+Por quê?  Porque aquele evento faz parte do modelo, o modelo faz parte da linguagem onipresente, que faz parte do domínio.
+
+Então, o DDD pede que o domínio apareça em todo o código, apareça em todas as comunicações.
+
+
+Então, você também tem o contexto e contexto delimitado.
+
+O que é o contexto e contexto delimitado? 
+
+O contexto estou falando de como as coisas são conceituadas aonde eu estou falando. 
+
+Muitas vezes, em software, a gente acredita que a informação tem que estar como um todo. 
+
+Muitas vezes a informação não tem que estar como um todo. Ela pode ser fragmentada. 
+
+Tal sistema pode lidar só com parte do dado, outro sistema pode lidar só com outra parte do dado. 
+
+Você tem que pensar cada um com o seu contexto.
+
+E com isso surge o contexto delimitado. 
+
+O que que é o contexto delimitado?
+
+É que cada parte do seu sistema vai compreender parte do seu domínio.
+
+Então, vamos pensar ali, numa operação de logística. 
+
+Operação de logística vai emitir um ID de rastreamento. 
+
+Ele não precisa saber tudo da compra. 
+
+Como foi o pagamento? 
+
+Então você vai ter um contexto limitado. 
+
+E uma outra coisa que o contexto limitado tem, são interfaces de comunicação. 
+
+Muitas vezes, nós desenvolvedores, vamos pensar em interface de comunicação, pensamos numa API. 
+
+Numa biblioteca. Numa biblioteca ou numa numa API REST. Uma documentação, alguma coisa síncrona. 
+
+Mas eventos também são de APIs de comunicação. 
+
+Também são interfaces de comunicação. 
+
+Quando eu envio um evento, outro sistema processa esse evento. 
+
+Então isso é uma interface de comunicação. É uma forma de um contexto enviar mensagens para outro contexto. 
+
+Então a modelagem, aqui eu já estou repetindo, a modelagem é o conhecimento destilado. É o código que surge quando o domínio é largamente discutido.
+
+É o código que surge, código de fala mesmo, quando o domínio é largamente discutido.
+
+Então, assim, se você, no seu projeto, não tem hábito de discutir o sistema. Elaborar frases sobre o sistema. Tenha esse hábito!
+
+Porque isso, treinar verbalmente a forma como seu sistema interage, é uma forma de compreender o sistema. 
+
+Que vai acabar enriquecendo o modelo, que pode até evitar a surgimento de bugs. 
+
+Acredite em mim! Se você duvida, segue a minha... dá uma olhada na minha playlist de Lendo Domain-Driven Design que você vai ver muita coisa lá. 
+
+O DDD, o Domain-Driven Design, vai fornecer uma diversos padrões que você pode usar no seu código.
+
+Então, eu estou falando de entidades, objetos de valor, agregado, serviço, repositório e... 
+
+Eu estou colocando aqui.. 
+
+Por que não a gente não  pode falar de eventos? 
+
+Eventos são desses padrões. 
+
+Tipos de objeto. 
+
+São padrões de código que Domain-Driven Design fala. 
+
+Se você tem dúvida, dá uma olhada na minha playlist que eu descrevo cada um desses tipos.
+
+Já está todos os vídeos sobre isso. A playlist não está completa, mas, assim, em algum momento eu vou concluir.
+
+E eu não falo sobre eventos. Não falo sobre eventos porque não tem, até o momento, na discussão. Não tem a discussão sobre eventos lá.
+
+
+Então assim... Como é que a gente modela Sistemas baseados em Eventos? 
+
+A gente vai agora para discutir isso.
+
+A primeira coisa que a gente tem que entender é: Entender a forma de comunicação. 
+
+Eventos é uma forma diferente de comunicação. Do que a gente está acostumado, na comunicação procedural. 
+
+Onde eu digo, eu faço uma requisição que vai acontecer tal coisa. 
+
+E eu espero as respostas. 
+
+Depois, a gente tem que definir os nossos processos como assíncronos. 
+
+Não adianta a gente dar soco em ponta de faca! 
+
+Se o meu processo não é definido como assíncrono, não adianta eu implementar um sistema assíncrono. 
+
+Eu tenho que primeiro redefinir o meu processo para depois implementar o sistema. 
+
+Por fim definir os eventos. 
+
+E dar nome, bons nomes, a esses eventos. 
+
+Então vamos começar discutindo a primeira coisa aqui. 
+
+Entender a forma de comunicação. 
+
+Nós somos muitos acostumados com a comunicação síncrona. 
+
+Então, eu estou colocando aqui um uma comunicação síncrona genérica. 
+
+Pode ser um HTTP, pode ser um graphQL, um gPRC, um RPC qualquer. 
+
+Onde um "Sistema A", ele emite uma requisição para um "Sistema B".
+
+O "Sistema B" responde a requisição que chega em A.
+
+Então o A, ele vai esperar essa resposta de B.
+
+O A terá a sua disponibilidade limitada por B. 
+
+Como a gente já viu, caso você tenha não tenha dúvidas ainda dá uma lida no artigo que está na descrição. 
+
+O A, ele deve conhecer B! 
+
+Toda vez que eu tenho uma API HTTP, eu tenho que saber o IP de B, o endereço de B, o host de B.
+
+Eu tenho que saber a API de B. 
+
+Tudo aquilo! Muitas informações de B. 
+
+Caso tenha uma alteração em B, ela tem que refletir em A. 
+
+Então assim se eu tiver que alterar... "Ah eu vou mudar um endpoint aqui, para ter uma coisa ali". Eu vou ter que refletir em A.
+
+Ou o contrário, caso eu queira alterar, eu vou saber que eu não posso alterar esse método de funcionamento. Porque o A depende da minha interface antiga.
+
+Então, o A, ele depende da API de B. 
+
+E se eu quiser hipoteticamente adicionar um serviço C? 
+
+O A também deve ser alterado! 
+
+Por quê? Porque o A chama B. O A chama todas as suas dependências programaticamente. 
+
+Ele vai lá. Eu falo: "Ah, quero fazer uma requisição, aqui, em B. Eu quero fazer uma requisição em C." 
+
+Ah, mas você pode falar "você pode fazer de outras formas". Com um API Gateway.
+
+Não! 
+
+Você não vai criar APIs novas com um API Gateway.
+
+Você pode, no máximo, quebrar um serviço em dois. 
+
+Mas assim você acaba tendo um API Gateway ali. 
+
+Você acaba tendo uma dependência síncrona do um sistema. 
+
+E, os sistemas baseados em eventos, eles são diferentes.
+
+Assim, gosto de ler, assim: O meu A, ele publica uma mensagem para o broker. E o B, ele subsescreve ao broker. Um tópico no broker. 
+
+Então eu tenho um broker de mensagens. 
+
+Então todas as mensagens são enviadas por brokers. E lidas do brokers. 
+
+Então o A, ele não depende diretamente do B. 
+
+O A vai depender do quê? 
+
+Ele depende de um tópico do broker, e do broker em si! 
+
+Ele não depende diretamente... Muitas vezes, o B, nem sabe que existe um A. E o A nem sabe que existe o B. 
+
+Ele só sabem que existem as mensagens a serem trocadas. 
+
+O B precisa conhecer somente o canal e o schema da mensagem. 
+
+Então eu digo: "Eu vou escutar o tópico tal, que tem um schema tal". 
+
+Que é, sei lá... Um JSON, é um AVRO, é um ProtoBuff.
+
+E caso eu queira adicionar um "Sistema C"? 
+
+Imagina que, eu queira adicionar um sistema um "Sistema C" que consome as mesmas mensagens que B. 
+
+Eu posso adicionar, sem impacto nenhum. 
+
+Então assim, o A manda a mensagem pro broker. E o broker vai mandar a mesma mensagem para os dois sistemas B e C.
+
+Ah óbvio que, a mensagem vai ser enviada tanto para o B quanto para o C.
+
+Ah se você não conhece sobre os tipos de sistemas baseados em eventos... 
+
+Quando você tem um Ponto-a-Ponto, vai ser enviado uma para cada um. 
+
+Mas se você tem ali um tópico, a mesma mensagem vai ser enviada para os diversos sistemas.
+
+Então a gente tem que definir o quê? Pra gente conseguir fazer isso? A gente tem que definir o nosso processo!
+
+É muito importante você definir o processo, antes de implementar um sistema baseado em eventos.
+
+Aqui eu fiz, basicamente, um levantamento de como seria um processo de um marketplace.
+
+Você vê aqui que tem uma compra finalizada. 
+
+Ele passa para reservar um produto. 
+
+Depois eu pergunto se tem estoque. 
+
+Se não tem eu só envio e-mail dizendo: "Olha eh o seu produto, infelizmente, não tem no estoque". 
+
+
+Se ele tem no estoque, eu respondo assim: "Olha ah sim! Tem no estoque! Confirma a compra!". 
+
+Realiza o pagamento. Realizou o pagamento? 
+
+Pagamento não aprovado? Envia o e-mail "Olha você não tem dinheiro no seu cartão". 
+
+E por fim se o pagamento for aprovado, envia pra logística! 
+
+E pronto o seu pedido tá finalizado! 
+
+Você conseguiu finalizar a compra! 
+
+Cada caixinha dessa aí pode ser um sistema diferente que se comunicam por evento. 
+
+Então pensa lá no marketplace que você usa.. 
+
+E você vai ver que você apertou o botão e aí algumas horas depois chega a compra dizendo: "Olha seu seu pagamento foi realizado"
+
+Talvez ali você tenha uma modelagem baseada em eventos.
+
+E qual que é a vantagem disso? 
+
+Imagina que você quando você aperta o botão, se você não tem um sistema baseado em eventos... você tem um sistema que tá focado no procedimento... 
+
+Quando você aperta o botão OK, você vai ter que ter uma infra para processar todas essas requisições. 
+
+Então o seu sistema vai reservar o produto, vai realizar o pagamento, vai enviar e-mail. 
+
+Tudo quanto você aperta o botão. 
+
+Que isso pode pode demandar duas coisas: vai demorar pro usuário ter resposta e você vai ter que ter infraestrutura para processar esse processamento computacional que tá sendo exigido. 
+
+Se você faz baseado em evento você pode procrastinar esse processamento. 
+
+Então imagina aí? Enviar para logística, você pode enviar no final do dia. Afinal, a sua equipe de logística sabe que a entrega para o correio só sai às 6 da tarde. 
+
+Então, assim se o cara fez a compra é 7 da manhã, ou 2 da tarde, não faz diferença. 
+
+Então assim o processamento ele não precisa ser no momento da compra. Ele pode demorar ali algumas horas. O pagamento pode namorar até algumas horas. Você pode ter diferente níveis de qualidade no tempo de resposta de cada atividade. 
+
+E aqui eu dou umas dicas.
+
+Se você quer modelar esse processo? E quer saber uma boa forma de modelar ele? O BPMN: Business Process Modelling Notation é uma boa notação para modelar.
+
+Então se você não conhece, acessa o site que tá no link aqui do BPMN.
+
+Você vai ver uma boa forma de modelar. 
+
+Cada processo, essas caixinhas recebe de eventos de entrada e pode emitir eventos na saída. 
+
+E os processos podem ser independentes e assíncrono. 
+
+Então pensa no seu processo de enviar e-mail? Pode ser um processo exclusivo! 
+
+Ele vai processando eventos e, cada vez que ele processa um evento você não vai depender do seu sistema original. 
+
+Do seu sistema que tá processando a requisição do usuário.
+
+E outra pergunta! Você pode fazer? 
+
+"Tá bom eu tenho cada caixinha dessa, mas como é que eu consigo quebrar essas caixinhas e definir quais são os eventos delas?"
+
+Na comunidade de DDD, tem um processo chamado Event Storming. 
+
+O que que é o Event Storming? 
+
+Você joga todo mundo que vai participar do desenvolvimento em uma sala. Define quais são os sistemas. E define quais são os processos.
+
+
+E aí cada time vai falando: "Olha para fazer tal coisa..." 
+
+Imagina que eu sou sistema de pagamento... o sistema de pagamento fala assim: 
+
+"O pagamento ele tem que ser feito depois que foi reservado o produto no estoque". 
+
+Então eu escutar o evento "Produto Reservado"... Eu vou ter que ter o quê?
+
+Eu vou ter que ter a informação do cliente, com a informação do cliente eu consigo acessar os dados do cliente. 
+
+E a informação da compra. Qual que é o ID daquela compra? 
+
+Para quê? Para acessar informações de pagamento. 
+
+Qual foi o método de pagamento usado? Se é PIX? Se é cartão de crédito? Qual o número do cartão de crédito? 
+
+Então nessa sessão chamada Event Storming, cada time vai colocar... 
+
+Quais são os eventos que precisam ser escutados? Quais são os eventos que precisa emitir? 
+
+Quais são os dados que se precisa em cada evento? E você vai conseguir modelar um sistema! 
+
+Então assim é importante ter! 
+
+Isso pode ser feito de forma distribuída ou não... Se, ah... pode fazer isso numa reunião? Até pode! Pode fazer isso aí - faça como você bem entender. O importante é que cada time consiga modelar seus eventos e consiga definir os dados necessários nos eventos.
+
+As vezes é muito ruim quando a gente define alguns eventos depois quando está implementando sistema fala assim: "Putz mas faltou um dado aqui eu vou ter que consultar o sistema..." 
+
+Aí fica um pouco complicado ali completar o sistema baseado em eventos.
+
+Então assim o Event Storming é uma prática que vai te ajudar a modelar os seus sistemas.
+
+E outra uma dica que eu já dou: Dê nomes aos eventos.
+
+Eu consigo classificar eventos e, aqui eu já sempre boto essa imagem quando eu vou falar desse assunto, em cinco tipos de eventos.
+
+
+Eu vou dizer que tem três tipos básicos. Quando quando estou falando de eventos. 
+
+Os eventos. O que eventos são eventos! Eventos são fatos que acontecem. 
+
+Então eu tenho ali um Usuário Criado. Se aconteceu algo no meu sistema... ali um evento! Né? 
+
+Eu tenho também comandos. O que que é comando? O comando é quando algum sistema quer enviar um comando para outro.
+
+
+Então ali imagina que eu tenho um sistema que ele terminou uma compra e ele quer gerar nota fiscal.
+
+E aí que que ele vai fazer? 
+
+Vai emitir um evento que é um comando. Gera a nota fiscal. 
+
+Que aí vai er um outro sistema, que vai entrar no sistema da prefeitura, que vai fazer não sei o quê... 
+
+Então vai ter um Comando. O comando ele sempre tem um verbo. Ele vai "gerar alguma coisa". 
+
+O evento, ele sempre vai ter um verbo no particípio passado. Usuário Criado".
+
+E eu tenho Documentos. Eu posso modelar sistemas baseados em documentos.
+
+Então toda vez que acontece alguma coisa com o meu usuário, eu pego todos os dados do usuário coloco no objetão Usuário e emito aquele dado.
+
+
+Olha o Usuário. 
+
+Então assim... se eu consumir o meu tópico dos eventos, cada mensagem vai ser vai ter todas as informações completas.
+
+
+Nos eventos, não! 
+
+Não preciso ter todas as informações. 
+
+Tanto que eu divido meus tipos de evento em dois tipos de eventos. 
+
+Os Eventos de Notificação, onde eu digo que aconteceu algo com ID. 
+
+Então assim usuário criado o ID dele é o ID 1.
+
+Tipo um outro evento ele vai fazer o quê? Poxa eu vi que esse usuário foi criado, eu posso chegar naquele endpoint e consumir o ID daquele usuário porque eu sei que um usuário foi criado. 
+
+Ou eu tenho um Evento de Transporte de Estado. 
+
+O que que é um Evento de Transporte de Estado? 
+
+Quando eu digo que aconteceu algo eu coloco todas as informações daquele algo.
+
+Então eu boto ali Usuário Criado... Então eu tenho identificador 1, eu tenho o nome do usuário, e-mail do usuário... Todos os dados do usuário! 
+
+Aí Usuário Alterado... aí tem só os campos alterados usuário.
+
+Então eu posso ter diversos Eventos de Notificação do Estado.
+
+Qual que é a diferença entre os dois? 
+
+Se eu tenho um Evento de Notificação? Em muitos casos eu preciso de comunicação direta com outro sistema.
+
+Então toda vez que eu vê uma notificação de Usuário Criado, eu vou ter que voltar lá no primeiro sistema e consultar: 
+
+"Ah o que que é esse usuário? Quais são os dados dele? Eu preciso fazer uma coisa com ele? blá blá.." 
+
+Então eu tenho esses cinco tipos de eventos. 
+
+Ele pode ser que eu tenha só um evento. 
+
+Defino ah isso aqui é só um evento aqui e pronto. 
+
+Como é que eu nomeio esses eventos? 
+
+Eu sempre digo para a gente usar nomes descritivos. 
+
+Então quando eu tenho um evento eu sempre boto um verbo no passado. Particípio passado. 
+
+"Usuário Criado", "Compra Efetivada", "Relatório Gerado" 
+
+Quando eu tenho um comando, eu sempre coloco um verbo imperativo no começo.
+
+"Gerar Relatório de Usuário", "Gerar não sei o quê", "Realizar Pagamento" 
+
+Então, assim, sempre vai ter um imperativo ali. 
+
+E, por fim, quando eu tenho um documento... É, basicamente, o nome daquele daquela daquela entidade. "Usuário" 
+
+Então, assim, essa é a forma que eu uso para nomear dar nome aos meus eventos.
+
+Aí você deve estar pensando.. "Ah Victor, então você usa DTO?" 
+
+Eu não uso DTO! 
+
+
+Quando eu faço a modelagem no sistemas, eu não uso DTO. 
+
+Por quê? Ah... você deve ter pensando... ah como é que você vai identificar que aquilo é um evento?
+
+Porque tá óbvio! Você vai ver ali! "Gerar Relatório de Usuário" 
+
+Você vai ver que aquilo é um evento. 
+
+Aquilo dali pode ser armazenado na base? Pode até ser armazenada na base, mas você vai saber que aquilo é evento. 
+
+Porque você vai conseguir ver... você pode até separar em um pacote como "eventos". Separado, né? 
+
+Mas você sabe que é um usuário. 
+
+Eu até uso um exemplo que pode parecer banal, até grosseiro, muitas vezes. 
+
+Eu falo assim a minha mãe me nomeou Victor. né? 
+
+Por quê? 
+
+Por que ela não botou Victor Pessoa? 
+
+Porque as pessoas sabem que eu sou uma pessoa. Elas olham para mim, elas identificam que eu sou uma pessoa. Eu não preciso falar que eu sou um DTO.
+
+
+Aliás, DTO é um sufixo de um tipo de objeto. 
+
+E a gente tem o costume de usar isso sufixo achando que ele traz mais entendimento ao nosso software. 
+
+Enquanto, muito pelo contrário, muitas vezes ele traz confusão.
+
+Eu já trabalhei em vários projetos em que as pessoas usavam o sufixo ali achando que só usar o sufixo trazia mais entendimento. 
+
+Então a pessoa botava ali UsuárioDTO. 
+
+E aí usava o mesmo DTO para em todos os cantos. 
+
+Eu sou bem crítico em relação a isso. 
+
+Eu prefiro perguntar... o que que é esse objeto? Ele é um objeto de transferência? Um Data Transfer Object? Objeto de Transferência de Estado? 
+
+Beleza! Então mas... O que que ele é? 
+
+Aquilo ali é uma requisição? É um evento? É um comando?
+
+Se é um evento, por que que eu não dou o nome daquele evento? Tipo "Usuário Criado"? "Usuário Criado" eu vou saber que é um nome.
+
+Se ele é uma requisição de criar usuário para uma chamada HTTP? Por que eu não botar "Requisição de Criação de Usuário"? 
+
+Ou "Criar Usuário Request"? Você vai saber! Você vai olhar, você vai e saber que aquilo é uma DTO. 
+
+Tanto que assim, muitas vezes, quando eu olho quem usa DTO, ele vai usar e usa o mesmo pro Request o mesmo pro Response. 
+
+E aí vai ficar uma confusão por que você olha a documentação e tá lá... Ele recebe um usuário um UsuárioDTO e ele retorna o UsuárioDTO.
+
+Então eu costumo sempre, e aí eu duplico mesmo as informações. Porque duplico as classes? 
+
+Até porque isso é muito bom! Muito bom por que? 
+
+Toda vez que eu tenho uma Request e uma Responsa, eu sei os campos. Eu sei a documentação de cada um. 
+
+E isso acaba refletindo na documentação da sua interface. 
+
+Eu tenho ali "Criar Usuário Request", "Criar Usuário Response" e cada um tem sua documentação específica. 
+
+Muitas pessoas falam: "Ah não é bom ter ter classe duplicada" 
+
+Nesse caso é até bom. 
+
+Nesse caso é bom! Use! Duplique código sim! Não tenha medo nisso! 
+
+Não tenha medo. 
+
+Porque são objetos diferentes. O objeto, ele é diferente. Né? 
+
+Então, se você não tiver um problema naquela classe, você vai percebendo seus testes.
+
+E aí, eu coloco mais alguns nomes aqui. 
+
+Eu vou ter que me repetir. 
+
+Cada evento deve ter o seu nome e seu schema bem definido. 
+
+Assim, defina nomes que dizem exatamente aquilo que está sendo feito. 
+
+Que descrevem o evento o nome tem que descrever o evento. 
+
+Se o nome não descreve o evento, se nome é genérico, ele não é um bom nome! 
+
+Os times devem conhecer o nome e o schema. 
+
+Para times muito grandes, assim para empresas que tem uma base de eventos muito grandes... 
+
+Eu recomendo o uso de um Schema Registry. Porque? 
+
+Se você nunca viu um Schema Registry...  existe alguns links aqui! 
+
+A gente pode falar do da Confluent. Tem o Apicurio. 
+
+Existem alguns registros de schema que você pode criar nos tópicos e descrever a o schema dos eventos.
+
+
+Você pode até pedir para gerar as classes baseado naquele tópico. 
+
+Você pode também usar nome descritivos, que eu já falei aqui. 
+
+"Usuário Criado", "Usuário Alterado", "Fechar Carrinho",  "Adicionar Produtos" 
+
+Então use e abuse dos nomes descritivos! 
+
+Eles são bons para os sistemas! 
+
+Eles trazem mais entendimento ao seu caso de uso. 
+
+E por fim você deve estar pensando assim... 
+
+"Tá beleza, eu já tenho um sistema aqui mas a minha maior preocupação é como que eu posso documentar esses eventos?" 
+
+Uma dica que eu dou... 
+
+Se você implementa APIs HTTP, se você não usa o OpenAPI? 
+
+Já dou a dica de usar o OpenAPI! 
+
+Entra no OpenAPI, o link tá aqui na descrição. 
+
+E tem também o AsyncAPI. 
+
+O que que é o AsyncAPI? 
+
+É uma linguagem de descrição para sistemas baseados em eventos.
+
+"Ah, mas eu não vou usar isso aí isso aí não me gera nada". 
+
+Gera sim! Você consegue ver como seus sistemas são definidos. 
+
+Muitas vezes as pessoas falam assim: "Ah mas, muitas vezes, o meu sistema está definido numa documentação que ela tá ultrapassada" 
+
+Então é muito melhor você ter uma documentação ultrapassada, do que você não tem documentação nenhuma.
+
+Porque uma documentação ultrapassada, ela pelo menos diz que a funcionalidade existe! 
+
+E você pode pedir uma uma atualização. 
+
+Ou um sistema que depende de uma documentação ultrapassada ele pode dar suporte ainda praquilo.
+
+Então, assim, descreva os seus sistemas. Descreva como você quer. 
+
+Eu costumo fazer, quando eu trabalhava em times de implementando interfaces web... 
+
+Um processo que chamava API First. 
+
+Isso eu fiz em alguns projetos. 
+
+A abordagem trouxe um ganho muito grande pro desenvolvimento. 
+
+Eu chegava ali, definia todas as interfaces, definia o que precisava e perguntava pro time: 
+
+"Olha dado essa interface aqui você consegue implementar o que você precisa?" 
+
+Então faça o mesmo! 
+
+Tenta definir... 
+
+Junta os times que vão conversar. Vai ali no Event Storming. 
+
+Tenta definir essa documentação. Entende como é que é funciona o AsyncAPI. 
+
+E gera essa documentação antes de você começar o desenvolvimento.
+
+
+Então era isso pessoal! 
+
+Eu espero ter te ajudado alguma coisa sobre a Modelagem de Sistemas Baseados em Eventos. 
+
+Eu sei que assim é muito difícil você começar a pensar em eventos. 
+
+É uma jornada para você sair, desse nesse lugar de pensar programaticamente... de pensar proceduralmente... 
+
+Pensar assim: "Ah quando eu crio o usuário, eu tenho que fazer 'tal coisa', 'tal coisa, 'tal coisa', 'tal coisa'..." 
+
+Para modelar aquilo, quem sabe numa máquina de estado, e dizer assim: 
+
+"Olha eu tenho os três estados do meu usuário: 
+
+'usuário criado', 'usuário confirmado', 'usuário removido' 
+
+e cada vez que eu emito um evento de um para outro, existe um processo que deve fazer 'tal coisa'" 
+
+Então quando você começa a pensar em eventos, você começa a pensar de forma diferente os seus sistemas.
+
+Eu espero que esse vídeo tenha te ajudado em alguma coisa. 
+
+Então entra em contato comigo nas redes sociais. 
+
+Tá aí o meu BlueSky. 
+
+Tá meu YouTube. Vocês devem estar vendo no YouTube! Eu espero. 
+
+Se você tiver alguma dúvida, entra em contato comigo. 
+
+Manda dúvida que eu sempre respondo. 
+
+Muito obrigado e compartilha esse vídeo. 
+
+Dá o like, nos ajuda o canal a crescer! 
+
+Valeu!!!!!
